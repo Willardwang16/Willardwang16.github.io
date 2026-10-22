@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet"><meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-RpjvZLhGdqxYFGP9FlNlJkD9gqoKYbhK6CypyCo9sZE='; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Document access</title><style>body{font:18px/1.6 system-ui,sans-serif;background:#fff;color:#171717;margin:0;padding:10vh 24px}main{max-width:590px;margin:auto}h1{font-size:30px;font-weight:650}a{display:block;width:fit-content;margin:20px 0;color:#111}a[hidden]{display:none}#open{background:#171717;color:white;text-decoration:none;padding:12px 22px;border-radius:4px}small{display:block;margin-top:40px;color:#666;font-size:14px}</style></head>
+<body><main><h1>Research paper</h1><p id="status" role="status">Loading…</p><a id="open" target="_blank" rel="noopener noreferrer" hidden>Open PDF</a><a id="download" download="ICDM_S30317_Jingran_Wang.pdf" hidden>Download PDF</a><small>This link contains access information. Please share it only with intended readers.</small></main><script>(async()=>{
+ const status=document.getElementById('status');
+ try{
+  const encoded=location.hash.slice(1);
+  if(!/^[A-Za-z0-9_-]{43}$/.test(encoded))throw new Error('A valid private link is required to open this document.');
+  status.textContent='Preparing your document…';
+  const keyBytes=Uint8Array.from(atob(encoded.replace(/-/g,'+').replace(/_/g,'/')+'='),c=>c.charCodeAt(0));
+  const key=await crypto.subtle.importKey('raw',keyBytes,{name:'AES-GCM'},false,['decrypt']);
+  const response=await fetch('./ICDM_S30317_Initial_Upload.pdf.enc',{credentials:'omit',referrerPolicy:'no-referrer'});
+  if(!response.ok)throw new Error('The document could not be loaded. Please try again.');
+  const packet=new Uint8Array(await response.arrayBuffer());
+  const bytes=await crypto.subtle.decrypt({name:'AES-GCM',iv:packet.slice(0,12)},key,packet.slice(12));
+  const blob=new Blob([bytes],{type:'application/pdf'});
+  const href=URL.createObjectURL(blob);
+  const open=document.getElementById('open');open.href=href;open.hidden=false;
+  const download=document.getElementById('download');download.href=href;download.hidden=false;
+  status.textContent='Your paper is ready. Open the PDF below.';
+ }catch(error){status.textContent=error.message==='A valid private link is required to open this document.'?error.message:'Unable to open the document. Please scan the original QR code again or check your connection.';}
+})();</script></body></html>
